@@ -36,7 +36,7 @@ struct fatality_event{
     char fatality_date[ DATE_LEN ]; // Date and time of fatality
     int fatality_age; // Age of fatality
     char fatality_sex; // Gender of fatality
-    char fatality_location[ FAT_LOC ]; // Location of fatality
+  char fatality_location[ FAC_LOC ]; //Location of fatality
 };
 
 struct hash_table_entry{
