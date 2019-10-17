@@ -48,15 +48,19 @@ int main(int argc, char** argv)
     exit(EXIT_FAILURE);
 
   string str;
+  int lineCount = 0;
   getline(input, str); //skip first line
   while(getline(input, str))
     {
       istringstream iss(str);
       string token;
       while(getline(iss, token, ','))
-	cout << token << " ";
+	{
+	  cout << token << " ";
+	}
+      lineCount++;
+      cout << endl;
     }
-  cout << endl;
-
+  cout << "Line count: " << lineCount << endl;
   return 0;
 }
