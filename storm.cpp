@@ -24,17 +24,47 @@ int main(int argc, char** argv)
   string detailsFile = "";
   string fatalitiesFile = "";
   annual_storms** annualStorms = new annual_storms*[numYears];
+  int totalNumEvents = 0;
 
   //filling array of years
   for(int i = 0; i < numYears; i++)
     years[i] = argv[i+2];
 
+  //obtaining total number of storm events for hash table
   for(int i = 0; i < numYears; i++)
     {
+      detailsFile = "details-" + years[i] + ".csv";
 
+      //couting number of events in each file
+      int detailsLineCount = getFileSize(detailsFile);
+      totalNumEvents += detailsLineCount;
     }
 
-  if(years[0] == "1950")
+  //initializing hash table
+  int tableSize = hashTableSize(totalNumEvents);
+  hash_table_entry** hashTable = new hash_table_entry*[tableSize];
+
+  //filling in arrays of storm events
+  for(int i = 0; i < numYears; i++)
+    {
+      detailsFile = "details-" + years[i] + ".csv";
+      fatalitiesFile = "fatalities-" + years[i] + ".csv";
+
+      //initializing array of storm_event
+      int detailsLineCount = getFileSize(detailsFile);
+      storm_event** stormEvents = new storm_event*[detailsLineCount];
+
+      //read files
+      readDetailsFile(hashTable, stormEvents, detailsFile, tableSize);
+      readFatalitiesFile(hashTable, stormEvents, fatalitiesFile, tableSize);
+
+      annual_storms* aYearOfStorms = new annual_storms;
+      aYearOfStorms->year = stoi(years[i]);
+      aYearOfStorms->events = stormEvents;
+      annualStorms[i] = aYearOfStorms;
+    }
+
+  /*if(years[0] == "1950")
     {
       detailsFile = "details-1950.csv";
       fatalitiesFile = "fatalities-1950.csv";
@@ -58,9 +88,8 @@ int main(int argc, char** argv)
   //read file
   readDetailsFile(hashTable, stormEvents, detailsFile, tableSize);
   readFatalitiesFile(hashTable, stormEvents, fatalitiesFile, tableSize);
-
-  cout << stormEvents[hashTable[10120406 % tableSize]->event_index]->f->fatality_date << endl;
-
+  */
+  cout << annualStorms[0]->events[hashTable[10120406 % tableSize]->event_index]->state << endl;
   return 0;
 }
 
