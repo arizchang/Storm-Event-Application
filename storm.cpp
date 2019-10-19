@@ -10,7 +10,7 @@
 int numberfy(string);
 bool testForPrime(int);
 int hashTableSize(int);
-void insertHashedEvent(hash_table_entry**, hash_table_entry*, int);
+void insertHashedEvent(hash_table_entry**&, hash_table_entry*&, int);
 
 using namespace std;
 
@@ -113,16 +113,18 @@ int main(int argc, char** argv)
       entry->event_index = i;
 
       stormEvents[i] = event;
-      hashTable[entry->event_id % tableSize] = entry;
+      insertHashedEvent(hashTable, entry, tableSize);      
 
 
       i++;
     }
 
-  for(int i = 0; i < lineCount; i++)
+  cout << stormEvents[hashTable[10017011 % tableSize]->event_index]->state << endl;
+
+  /*for(int i = 0; i < lineCount; i++)
     {
       cout << stormEvents[i]->event_id << " " << stormEvents[i]->state << " " << stormEvents[i]->damage_property << endl;
-    }
+      }*/
 
   return 0;
 }
