@@ -34,10 +34,10 @@ struct fatality_event{
     int fatality_id; // Identifier of the fatality
     int event_id; // Identifier of the storm event
     char fatality_type; // D or I
-    char fatality_date[ DATE_LEN ]; // Date and time of fatality
+    string fatality_date; // Date and time of fatality
     int fatality_age; // Age of fatality
     char fatality_sex; // Gender of fatality
-  char fatality_location[ FAT_LOC ]; //Location of fatality
+  string fatality_location; //Location of fatality
   struct fatality_event *next; //poirnter to next fatality event
 };
 

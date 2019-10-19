@@ -7,7 +7,8 @@
 
 //functions used
 int getFileSize(string);
-void readFile(hash_table_entry**&, storm_event**&, string, int);
+void readDetailsFile(hash_table_entry**&, storm_event**&, string, int);
+void readFatalitiesFile(hash_table_entry**&, storm_event**&, string, int);
 int numberfy(string);
 bool testForPrime(int);
 int hashTableSize(int);
@@ -52,9 +53,9 @@ int main(int argc, char** argv)
   hash_table_entry** hashTable = new hash_table_entry*[hashTableSize(lineCount)];
 
   //read file
-  readFile(hashTable, stormEvents, file, tableSize);
+  readDetailsFile(hashTable, stormEvents, file, tableSize);
 
-  cout << stormEvents[hashTable[10017011 % tableSize]->event_index]->state << endl;
+  cout << stormEvents[hashTable[10017011 % tableSize]->event_index]->tor_f_scale << endl;
 
   /*for(int i = 0; i < lineCount; i++)
     {
@@ -81,9 +82,54 @@ int getFileSize(string file)
   return lineCount;
 }
 
-void readFile(hash_table_entry**& hashTable, storm_event**& stormEvents, string file, int tableSize)
+void readFatalitiesFile(hash_table_entry**& hashTable, storm_event**& stormEvents, string file, int tableSize)
 {
   //filling in array of storm_event structs
+  ifstream data(file);
+  string str;
+  int i = 0;
+  getline(data, str); //skip first line
+  while(getline(data, str))
+    {
+      istringstream iss(str);
+      string token;
+      fatality_event* event = new fatality_event; //new storm_event struct
+      hash_table_entry* entry = new hash_table_entry; //new hash_table_entry struct
+
+      //filling in a struct of storm_event and hash_table_entry
+      getline(iss, token, ',');
+      event->fatality_id = stoi(token);
+
+      getline(iss, token, ',');
+      event->event_id = stoi(token);
+
+      getline(iss, token, ',');
+      event->fatality_type = token[0];
+
+      getline(iss, token, ',');
+      event->fatality_date = token;
+
+      getline(iss, token, ',');
+      event->fatality_age = stoi(token);
+
+      getline(iss, token, ',');
+      event->fatality_sex = token[0];
+
+      getline(iss, token, ',');
+      event->fatality_location = token;
+
+      //insert event into array of storm events and hash table
+      //stormEvents[i] = event;
+      //insertHashedEvent(hashTable, entry, tableSize);      
+
+
+      i++;
+    }
+}
+
+void readDetailsFile(hash_table_entry**& hashTable, storm_event**& stormEvents, string file, int tableSize)
+{
+  //linking fatalities to respective storm events
   ifstream data(file);
   string str;
   int i = 0;
