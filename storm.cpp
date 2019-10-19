@@ -13,6 +13,7 @@ int numberfy(string);
 bool testForPrime(int);
 int hashTableSize(int);
 void insertHashedEvent(hash_table_entry**&, hash_table_entry*&, int);
+int hash(int, int);
 
 using namespace std;
 
@@ -26,7 +27,8 @@ int main(int argc, char** argv)
 
   int numYears = stoi(argv[1]);
   string* years = new string[numYears];
-  string file = "";
+  string detailsFile = "";
+  string fatalitiesFile = "";
   annual_storms** annualStorms = new annual_storms*[numYears];
 
   //filling vector of years
@@ -34,28 +36,31 @@ int main(int argc, char** argv)
     years[i] = argv[i+2];
 
   if(years[0] == "1950")
-    file = "details-1950.csv";
+    {
+      detailsFile = "details-1950.csv";
+      fatalitiesFile = "fatalities-1950.csv";
+    }
   else if(years[0] == "1951")
-    file = "details-1951.csv";
+    detailsFile = "details-1951.csv";
   else if(years[0] == "1952")
-    file = "details-1952.csv";
+    detailsFile = "details-1952.csv";
   else
     cout << "Invalid input" << endl;
 
   //initializing array of storm_event
-  int lineCount = getFileSize(file);
-  storm_event** stormEvents = new storm_event*[lineCount];   
+  int detailsLineCount = getFileSize(detailsFile);
+  storm_event** stormEvents = new storm_event*[detailsLineCount];   
   
   //initializing hash table
   int tableSize = 0;
-  cout << hashTableSize(lineCount) << endl;
-  tableSize = hashTableSize(lineCount);
-  hash_table_entry** hashTable = new hash_table_entry*[hashTableSize(lineCount)];
+  tableSize = hashTableSize(detailsLineCount);
+  hash_table_entry** hashTable = new hash_table_entry*[hashTableSize(detailsLineCount)];
 
   //read file
-  readDetailsFile(hashTable, stormEvents, file, tableSize);
+  readDetailsFile(hashTable, stormEvents, detailsFile, tableSize);
+  readFatalitiesFile(hashTable, stormEvents, fatalitiesFile, tableSize);
 
-  cout << stormEvents[hashTable[10017011 % tableSize]->event_index]->tor_f_scale << endl;
+  cout << stormEvents[hashTable[10120406 % tableSize]->event_index]->f->fatality_id << endl;
 
   /*for(int i = 0; i < lineCount; i++)
     {
@@ -110,13 +115,18 @@ void readFatalitiesFile(hash_table_entry**& hashTable, storm_event**& stormEvent
       event->fatality_date = token;
 
       getline(iss, token, ',');
-      event->fatality_age = stoi(token);
+      if(token.length() == 0)
+	event->fatality_age = -1;
+      else
+	event->fatality_age = stoi(token);
 
       getline(iss, token, ',');
       event->fatality_sex = token[0];
 
       getline(iss, token, ',');
       event->fatality_location = token;
+
+      stormEvents[hashTable[event->event_id % tableSize]->event_index]->f = event;
 
       //insert event into array of storm events and hash table
       //stormEvents[i] = event;
@@ -186,6 +196,7 @@ void readDetailsFile(hash_table_entry**& hashTable, storm_event**& stormEvents, 
       getline(iss, token, ',');
       event->tor_f_scale = token;
 
+      event->f = NULL;
       entry->event_index = i;
 
       //insert event into array of storm events and hash table
