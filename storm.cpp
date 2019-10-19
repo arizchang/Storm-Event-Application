@@ -19,21 +19,20 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-  /*string test = "test";
-  int num = 1950;
-  test = test + to_string(num);
-  cout << test;
-  */
-
   int numYears = stoi(argv[1]);
   string* years = new string[numYears];
   string detailsFile = "";
   string fatalitiesFile = "";
   annual_storms** annualStorms = new annual_storms*[numYears];
 
-  //filling vector of years
+  //filling array of years
   for(int i = 0; i < numYears; i++)
     years[i] = argv[i+2];
+
+  for(int i = 0; i < numYears; i++)
+    {
+
+    }
 
   if(years[0] == "1950")
     {
@@ -60,12 +59,7 @@ int main(int argc, char** argv)
   readDetailsFile(hashTable, stormEvents, detailsFile, tableSize);
   readFatalitiesFile(hashTable, stormEvents, fatalitiesFile, tableSize);
 
-  cout << stormEvents[hashTable[10120406 % tableSize]->event_index]->f->fatality_id << endl;
-
-  /*for(int i = 0; i < lineCount; i++)
-    {
-      cout << stormEvents[i]->event_id << " " << stormEvents[i]->state << " " << stormEvents[i]->damage_property << endl;
-      }*/
+  cout << stormEvents[hashTable[10120406 % tableSize]->event_index]->f->fatality_date << endl;
 
   return 0;
 }
