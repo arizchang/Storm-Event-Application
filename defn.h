@@ -9,7 +9,7 @@ using namespace std;
 
 struct annual_storms{
 	int year; // Year of storm events
-	struct storm_event *events;  // Pointer to array of storm events for the given year
+	struct storm_event **events;  // Pointer to array of storm events for the given year
 };
 
 struct storm_event{
