@@ -2,11 +2,12 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include <vector>
 #include <cmath>
 #include "defn.h"
 
 //functions used
+int getFileSize(string);
+void readFile(hash_table_entry**&, storm_event**&, string, int);
 int numberfy(string);
 bool testForPrime(int);
 int hashTableSize(int);
@@ -16,9 +17,15 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-  string* years = new string[3];
-  string file = "";
+  /*string test = "test";
+  int num = 1950;
+  test = test + to_string(num);
+  cout << test;
+  */
+
   int numYears = stoi(argv[1]);
+  string* years = new string[numYears];
+  string file = "";
   annual_storms** annualStorms = new annual_storms*[numYears];
 
   //filling vector of years
@@ -34,7 +41,31 @@ int main(int argc, char** argv)
   else
     cout << "Invalid input" << endl;
 
-  //file reading
+  //initializing array of storm_event
+  int lineCount = getFileSize(file);
+  storm_event** stormEvents = new storm_event*[lineCount];   
+  
+  //initializing hash table
+  int tableSize = 0;
+  cout << hashTableSize(lineCount) << endl;
+  tableSize = hashTableSize(lineCount);
+  hash_table_entry** hashTable = new hash_table_entry*[hashTableSize(lineCount)];
+
+  //read file
+  readFile(hashTable, stormEvents, file, tableSize);
+
+  cout << stormEvents[hashTable[10017011 % tableSize]->event_index]->state << endl;
+
+  /*for(int i = 0; i < lineCount; i++)
+    {
+      cout << stormEvents[i]->event_id << " " << stormEvents[i]->state << " " << stormEvents[i]->damage_property << endl;
+      }*/
+
+  return 0;
+}
+
+int getFileSize(string file)
+{
   ifstream input(file);
 
   if(!input.is_open())
@@ -46,16 +77,15 @@ int main(int argc, char** argv)
   getline(input, str); //skip first line
   while(getline(input, str))
     lineCount++;
-   
-  //initializing hash table
-  int tableSize = 0;
-  cout << hashTableSize(lineCount) << endl;
-  tableSize = hashTableSize(lineCount);
-  hash_table_entry** hashTable = new hash_table_entry*[hashTableSize(lineCount)];
 
+  return lineCount;
+}
+
+void readFile(hash_table_entry**& hashTable, storm_event**& stormEvents, string file, int tableSize)
+{
   //filling in array of storm_event structs
   ifstream data(file);
-  storm_event** stormEvents = new storm_event*[lineCount];
+  string str;
   int i = 0;
   getline(data, str); //skip first line
   while(getline(data, str))
@@ -112,21 +142,13 @@ int main(int argc, char** argv)
 
       entry->event_index = i;
 
+      //insert event into array of storm events and hash table
       stormEvents[i] = event;
       insertHashedEvent(hashTable, entry, tableSize);      
 
 
       i++;
     }
-
-  cout << stormEvents[hashTable[10017011 % tableSize]->event_index]->state << endl;
-
-  /*for(int i = 0; i < lineCount; i++)
-    {
-      cout << stormEvents[i]->event_id << " " << stormEvents[i]->state << " " << stormEvents[i]->damage_property << endl;
-      }*/
-
-  return 0;
 }
 
 int numberfy(string str)
