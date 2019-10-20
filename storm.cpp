@@ -13,7 +13,7 @@ int numberfy(string);
 bool testForPrime(int);
 int hashTableSize(int);
 void insertHashedEvent(hash_table_entry**&, hash_table_entry*&, int);
-int hash(int, int);
+storm_event* findEvent(annual_storms**&, hash_table_entry**&, int, int, int);
 
 using namespace std;
 
@@ -58,38 +58,30 @@ int main(int argc, char** argv)
       readDetailsFile(hashTable, stormEvents, detailsFile, tableSize);
       readFatalitiesFile(hashTable, stormEvents, fatalitiesFile, tableSize);
 
+      //making new annual_storms struct
       annual_storms* aYearOfStorms = new annual_storms;
       aYearOfStorms->year = stoi(years[i]);
       aYearOfStorms->events = stormEvents;
       annualStorms[i] = aYearOfStorms;
     }
 
-  /*if(years[0] == "1950")
-    {
-      detailsFile = "details-1950.csv";
-      fatalitiesFile = "fatalities-1950.csv";
-    }
-  else if(years[0] == "1951")
-    detailsFile = "details-1951.csv";
-  else if(years[0] == "1952")
-    detailsFile = "details-1952.csv";
-  else
-    cout << "Invalid input" << endl;
-
-  //initializing array of storm_event
-  int detailsLineCount = getFileSize(detailsFile);
-  storm_event** stormEvents = new storm_event*[detailsLineCount];   
+  //cout << annualStorms[0]->events[hashTable[10120406 % tableSize]->event_index]->state << endl;
   
-  //initializing hash table
-  int tableSize = 0;
-  tableSize = hashTableSize(detailsLineCount);
-  hash_table_entry** hashTable = new hash_table_entry*[hashTableSize(detailsLineCount)];
+  //beginning of queries
+  int numQueries = 0;
+  int querie = 0;
+  cout << "How many queries? " << endl;
+  cin >> numQueries;
 
-  //read file
-  readDetailsFile(hashTable, stormEvents, detailsFile, tableSize);
-  readFatalitiesFile(hashTable, stormEvents, fatalitiesFile, tableSize);
-  */
-  cout << annualStorms[0]->events[hashTable[10120406 % tableSize]->event_index]->state << endl;
+  for(int i = 0; i < numQueries; i++)
+    {
+      cin >> querie;
+      //int eventId = stoi(querie);
+      
+      storm_event* event = findEvent(annualStorms, hashTable, querie, tableSize, numYears);
+      cout << event->state << endl;
+    }
+
   return 0;
 }
 
@@ -281,4 +273,17 @@ void insertHashedEvent(hash_table_entry** &hashTable, hash_table_entry* &entry, 
       entry->next = hashTable[hash];
       hashTable[hash] = entry;
     }
+}
+
+storm_event* findEvent(annual_storms**& annualStorms, hash_table_entry**& hashTable, int eventId, int tableSize, int numYears)
+{
+  int hash = eventId % tableSize;
+  storm_event* event = new storm_event;
+
+  for(int i = 0; i < numYears; i++)
+    {
+      if(annualStorms[i]->events[hashTable[hash]->event_index]->event_id == eventId)
+	return annualStorms[i]->events[hashTable[hash]->event_index];
+    }
+  return event;
 }
