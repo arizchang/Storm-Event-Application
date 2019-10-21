@@ -14,6 +14,7 @@ bool testForPrime(int);
 int hashTableSize(int);
 void insertHashedEvent(hash_table_entry**&, hash_table_entry*&, int);
 void findEvent(annual_storms**&, hash_table_entry**&, int, int, int);
+int search(annual_storms**&, hash_table_entry**&, int, int, int);
 
 using namespace std;
 
@@ -320,36 +321,59 @@ void findEvent(annual_storms**& annualStorms, hash_table_entry**& hashTable, int
 {
   int hash = eventId % tableSize;
   storm_event* event = new storm_event;
+  int eventIndex = search(annualStorms, hashTable, eventId, tableSize, numYears);
 
-  for(int i = 0; i < numYears; i++)
+  if(eventIndex != -1)
     {
-      if(annualStorms[i]->events[hashTable[hash]->event_index]->event_id == eventId)
+      for(int i = 0; i < numYears; i++)
 	{
-	  event = annualStorms[i]->events[hashTable[hash]->event_index];
-	  i = numYears;
+	  if(annualStorms[i]->events[eventIndex]->event_id == eventId)
+	    {
+	      event = annualStorms[i]->events[eventIndex];
+	      i = numYears;
+	    }
 	}
+
+      cout << "Event ID: " << event->event_id << endl;
+      cout << "State: " << event->state << endl;
+      cout << "Year: " << event->year << endl;
+      cout << "Month: " << event->month_name << endl;
+      cout << "Event Type: " << event->event_type << endl;
+      cout << "CZ Type: " << event->cz_type << endl;
+      cout << "CZ Name: " << event->cz_name << endl;
+      cout << "Direct Injuries: " << event->injuries_direct << endl;
+      cout << "Indirect Injuries: " << event->injuries_indirect << endl;
+      cout << "Direct Deaths: " << event->deaths_direct << endl;
+      cout << "Indirect Deaths: " << event->deaths_indirect << endl;
+      cout << "Property Damage: $" << event->damage_property << endl;
+      cout << "Crop Damage: $" << event->damage_crops << endl;
+      cout << "Tornado Fujita Scale: " << event->tor_f_scale << endl << endl;
+
+      cout << "Fatality ID: " << event->f->fatality_id << endl;
+      cout << "Event ID: " << event->f->event_id << endl;
+      cout << "Fatality Type: " << event->f->fatality_type << endl;
+      cout << "Fatality Date: " << event->f->fatality_date << endl;
+      cout << "Fatality Age: " << event->f->fatality_age << endl;
+      cout << "Fatality Sex: " << event->f->fatality_sex << endl;
+      cout << "Fatality Location: " << event->f->fatality_location << endl << endl;
     }
+  else
+    cout << "Event ID not found" << endl;
 
-  cout << "Event ID: " << event->event_id << endl;
-  cout << "State: " << event->state << endl;
-  cout << "Year: " << event->year << endl;
-  cout << "Month: " << event->month_name << endl;
-  cout << "Event Type: " << event->event_type << endl;
-  cout << "CZ Type: " << event->cz_type << endl;
-  cout << "CZ Name: " << event->cz_name << endl;
-  cout << "Direct Injuries: " << event->injuries_direct << endl;
-  cout << "Indirect Injuries: " << event->injuries_indirect << endl;
-  cout << "Direct Deaths: " << event->deaths_direct << endl;
-  cout << "Indirect Deaths: " << event->deaths_indirect << endl;
-  cout << "Property Damage: $" << event->damage_property << endl;
-  cout << "Crop Damage: $" << event->damage_crops << endl;
-  cout << "Tornado Fujita Scale: " << event->tor_f_scale << endl << endl;
+}
 
-  cout << "Fatality ID: " << event->f->fatality_id << endl;
-  cout << "Event ID: " << event->f->event_id << endl;
-  cout << "Fatality Type: " << event->f->fatality_type << endl;
-  cout << "Fatality Date: " << event->f->fatality_date << endl;
-  cout << "Fatality Age: " << event->f->fatality_age << endl;
-  cout << "Fatality Sex: " << event->f->fatality_sex << endl;
-  cout << "Fatality Location: " << event->f->fatality_location << endl;
+int search(annual_storms**& annualStorms, hash_table_entry**& hashTable, int eventId, int tableSize, int numYears)
+{
+  int foundKey = -1;
+  int hash = eventId % tableSize;
+  hash_table_entry* entry = hashTable[hash];
+
+  while(entry != NULL && foundKey == -1)
+    {
+      if(entry->event_id == eventId)
+	foundKey = entry->event_index;
+      else
+	entry = entry->next;
+    }
+  return foundKey;
 }
