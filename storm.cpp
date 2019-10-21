@@ -190,8 +190,16 @@ void readDetailsFile(hash_table_entry**& hashTable, storm_event**& stormEvents, 
       event->state = token;
 
       getline(iss, token, ',');
-      event->year = stoi(token);
-      entry->year = stoi(token);
+      if(token.length() == 0)
+	{
+	  event->year = -1;
+	  entry->year = -1;
+	}
+      else
+	{
+	  event->year = stoi(token);
+	  entry->year = stoi(token);
+	}
 
       getline(iss, token, ',');
       event->month_name = token;
@@ -206,22 +214,40 @@ void readDetailsFile(hash_table_entry**& hashTable, storm_event**& stormEvents, 
       event->cz_name = token;
 
       getline(iss, token, ',');
-      event->injuries_direct = stoi(token);
+      if(token.length() == 0)
+	event->injuries_direct = -1;
+      else
+	event->injuries_direct = stoi(token);
 
       getline(iss, token, ',');
-      event->injuries_indirect = stoi(token);
+      if(token.length() == 0)
+	event->injuries_indirect = -1;
+      else
+	event->injuries_indirect = stoi(token);
 
       getline(iss, token, ',');
-      event->deaths_direct = stoi(token);
+      if(token.length() == 0)
+	event->deaths_direct = -1;
+      else
+	event->deaths_direct = stoi(token);
 
       getline(iss, token, ',');
-      event->deaths_indirect =  stoi(token);
+      if(token.length() == 0)
+	event->deaths_indirect = -1;
+      else
+	event->deaths_indirect =  stoi(token);
 
       getline(iss, token, ',');
-      event->damage_property = numberfy(token);
+      if(token.length() == 0)
+	event->damage_property = -1;
+      else
+	event->damage_property = numberfy(token);
 
       getline(iss, token, ',');
-      event->damage_crops = numberfy(token);
+      if(token.length() == 0)
+	event->damage_crops = -1;
+      else
+	event->damage_crops = numberfy(token);
 
       getline(iss, token, ',');
       event->tor_f_scale = token;
