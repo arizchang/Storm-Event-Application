@@ -15,6 +15,8 @@ int hashTableSize(int);
 void insertHashedEvent(hash_table_entry**&, hash_table_entry*&, int);
 void findEvent(annual_storms**&, hash_table_entry**&, int, int, int);
 int search(annual_storms**&, hash_table_entry**&, int, int, int);
+int searchYear(annual_storms**&, hash_table_entry**&, int, int, int);
+int getLinkedListSize(hash_table_entry**&, int);
 
 using namespace std;
 
@@ -95,6 +97,12 @@ int main(int argc, char** argv)
       findEvent(annualStorms, hashTable, theEventId, tableSize, numYears);
     }
 
+  //printing out summary of hash table
+  for(int i = 0; i < tableSize; i++)
+    {
+      cout << getLinkedListSize(hashTable, i) << endl;
+    }
+
   delete hashTable;
   delete annualStorms;
   return 0;
@@ -159,11 +167,6 @@ void readFatalitiesFile(hash_table_entry**& hashTable, storm_event**& stormEvent
 
       stormEvents[hashTable[event->event_id % tableSize]->event_index]->f = event;
 
-      //insert event into array of storm events and hash table
-      //stormEvents[i] = event;
-      //insertHashedEvent(hashTable, entry, tableSize);      
-
-
       i++;
     }
 }
@@ -202,6 +205,7 @@ void readDetailsFile(hash_table_entry**& hashTable, storm_event**& stormEvents, 
 	  entry->year = stoi(token);
 	}
 
+      //fills in attributes of the event
       getline(iss, token, ',');
       event->month_name = token;
 
@@ -306,15 +310,16 @@ int hashTableSize(int num)
 void insertHashedEvent(hash_table_entry** &hashTable, hash_table_entry* &entry, int tableSize)
 {
   int hash = entry->event_id % tableSize;
+  hash_table_entry* head = hashTable[hash];
 
-  if(hashTable[hash] == NULL)
-    hashTable[hash] = entry;
+  if(head == NULL)
+    entry->next = NULL;
 
   else
     {
-      entry->next = hashTable[hash];
-      hashTable[hash] = entry;
+      entry->next = head;
     }
+  hashTable[hash] = entry;
 }
 
 void findEvent(annual_storms**& annualStorms, hash_table_entry**& hashTable, int eventId, int tableSize, int numYears)
@@ -325,12 +330,17 @@ void findEvent(annual_storms**& annualStorms, hash_table_entry**& hashTable, int
 
   if(eventIndex != -1)
     {
+      int year = searchYear(annualStorms, hashTable, eventId, tableSize, numYears);
+
       for(int i = 0; i < numYears; i++)
 	{
-	  if(annualStorms[i]->events[eventIndex]->event_id == eventId)
+	  if(annualStorms[i]->year == year)
 	    {
-	      event = annualStorms[i]->events[eventIndex];
-	      i = numYears;
+	      if(annualStorms[i]->events[eventIndex]->event_id == eventId)
+		{
+		  event = annualStorms[i]->events[eventIndex];
+		  i = numYears;
+		}
 	    }
 	}
 
@@ -349,13 +359,18 @@ void findEvent(annual_storms**& annualStorms, hash_table_entry**& hashTable, int
       cout << "Crop Damage: $" << event->damage_crops << endl;
       cout << "Tornado Fujita Scale: " << event->tor_f_scale << endl << endl;
 
-      cout << "Fatality ID: " << event->f->fatality_id << endl;
-      cout << "Event ID: " << event->f->event_id << endl;
-      cout << "Fatality Type: " << event->f->fatality_type << endl;
-      cout << "Fatality Date: " << event->f->fatality_date << endl;
-      cout << "Fatality Age: " << event->f->fatality_age << endl;
-      cout << "Fatality Sex: " << event->f->fatality_sex << endl;
-      cout << "Fatality Location: " << event->f->fatality_location << endl << endl;
+      if(event->f != NULL)
+	{  
+	  cout << "Fatality ID: " << event->f->fatality_id << endl;
+	  cout << "Event ID: " << event->f->event_id << endl;
+	  cout << "Fatality Type: " << event->f->fatality_type << endl;
+	  cout << "Fatality Date: " << event->f->fatality_date << endl;
+	  cout << "Fatality Age: " << event->f->fatality_age << endl;
+	  cout << "Fatality Sex: " << event->f->fatality_sex << endl;
+	  cout << "Fatality Location: " << event->f->fatality_location << endl << endl;
+	}
+      else
+	cout << "No fatalities" << endl << endl;
     }
   else
     cout << "Event ID not found" << endl;
@@ -376,4 +391,33 @@ int search(annual_storms**& annualStorms, hash_table_entry**& hashTable, int eve
 	entry = entry->next;
     }
   return foundKey;
+}
+
+//returns year of the event
+int searchYear(annual_storms**& annualStorms, hash_table_entry**& hashTable, int eventId, int tableSize, int numYears)
+{
+  int year = -1;
+  int hash = eventId % tableSize;
+  hash_table_entry* entry = hashTable[hash];
+
+  while(entry != NULL && year == -1)
+    {
+      if(entry->event_id == eventId)
+	year = entry->year;
+      else
+	entry = entry->next;
+    }
+  return year;
+}
+
+int getLinkedListSize(hash_table_entry**& hashTable, int index)
+{
+  int count = 0;
+  hash_table_entry* current = hashTable[index];
+  while(current != NULL)
+    {
+      count++;
+      current = current->next;
+    }
+  return count;
 }
