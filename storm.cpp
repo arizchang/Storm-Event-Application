@@ -13,7 +13,7 @@ int numberfy(string);
 bool testForPrime(int);
 int hashTableSize(int);
 void insertHashedEvent(hash_table_entry**&, hash_table_entry*&, int);
-storm_event* findEvent(annual_storms**&, hash_table_entry**&, int, int, int);
+void findEvent(annual_storms**&, hash_table_entry**&, int, int, int);
 
 using namespace std;
 
@@ -69,22 +69,37 @@ int main(int argc, char** argv)
   
   //beginning of queries
   int numQueries = 0;
-  int querie = 0;
-  cout << "How many queries? " << endl;
+  string querie = "";
+  int theEventId = 0;
+  string querieType = "";
+  string querieEvent = "";
+  string querieEventId = "";
+  cout << "How many queries? ";
   cin >> numQueries;
+  getline(cin, querie);
 
   for(int i = 0; i < numQueries; i++)
     {
-      cin >> querie;
+      //cin >> querie;
       //int eventId = stoi(querie);
+      getline(cin, querie);
+
+      istringstream parser;
+      parser.str(querie);
+      parser >> querieType;
+      parser >> querieEvent;
+      parser >> querieEventId;
+      theEventId = stoi(querieEventId);
       
-      storm_event* event = findEvent(annualStorms, hashTable, querie, tableSize, numYears);
-      cout << event->state << endl;
+      findEvent(annualStorms, hashTable, theEventId, tableSize, numYears);
     }
 
+  delete hashTable;
+  delete annualStorms;
   return 0;
 }
 
+//returns file size
 int getFileSize(string file)
 {
   ifstream input(file);
@@ -275,7 +290,7 @@ void insertHashedEvent(hash_table_entry** &hashTable, hash_table_entry* &entry, 
     }
 }
 
-storm_event* findEvent(annual_storms**& annualStorms, hash_table_entry**& hashTable, int eventId, int tableSize, int numYears)
+void findEvent(annual_storms**& annualStorms, hash_table_entry**& hashTable, int eventId, int tableSize, int numYears)
 {
   int hash = eventId % tableSize;
   storm_event* event = new storm_event;
@@ -283,7 +298,32 @@ storm_event* findEvent(annual_storms**& annualStorms, hash_table_entry**& hashTa
   for(int i = 0; i < numYears; i++)
     {
       if(annualStorms[i]->events[hashTable[hash]->event_index]->event_id == eventId)
-	return annualStorms[i]->events[hashTable[hash]->event_index];
+	{
+	  event = annualStorms[i]->events[hashTable[hash]->event_index];
+	  i = numYears;
+	}
     }
-  return event;
+
+  cout << "Event ID: " << event->event_id << endl;
+  cout << "State: " << event->state << endl;
+  cout << "Year: " << event->year << endl;
+  cout << "Month: " << event->month_name << endl;
+  cout << "Event Type: " << event->event_type << endl;
+  cout << "CZ Type: " << event->cz_type << endl;
+  cout << "CZ Name: " << event->cz_name << endl;
+  cout << "Direct Injuries: " << event->injuries_direct << endl;
+  cout << "Indirect Injuries: " << event->injuries_indirect << endl;
+  cout << "Direct Deaths: " << event->deaths_direct << endl;
+  cout << "Indirect Deaths: " << event->deaths_indirect << endl;
+  cout << "Property Damage: $" << event->damage_property << endl;
+  cout << "Crop Damage: $" << event->damage_crops << endl;
+  cout << "Tornado Fujita Scale: " << event->tor_f_scale << endl << endl;
+
+  cout << "Fatality ID: " << event->f->fatality_id << endl;
+  cout << "Event ID: " << event->f->event_id << endl;
+  cout << "Fatality Type: " << event->f->fatality_type << endl;
+  cout << "Fatality Date: " << event->f->fatality_date << endl;
+  cout << "Fatality Age: " << event->f->fatality_age << endl;
+  cout << "Fatality Sex: " << event->f->fatality_sex << endl;
+  cout << "Fatality Location: " << event->f->fatality_location << endl;
 }
