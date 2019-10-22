@@ -14,9 +14,10 @@ bool testForPrime(int);
 int hashTableSize(int);
 void insertHashedEvent(hash_table_entry**&, hash_table_entry*&, int);
 void findEvent(annual_storms**&, hash_table_entry**&, int, int, int);
-int search(hash_table_entry**&, int, int, int);
-int searchYear(hash_table_entry**&, int, int, int);
+int search(hash_table_entry**&, int, int);
+int searchYear(hash_table_entry**&, int, int);
 int getLinkedListSize(hash_table_entry**&, int);
+int getFatalitySize(fatality_event*);
 int findMax(int*, int);
 int getCount(int*, int, int);
 
@@ -173,7 +174,9 @@ void readFatalitiesFile(hash_table_entry**& hashTable, storm_event**& stormEvent
       getline(iss, token, ',');
       event->fatality_location = token;
 
-      fatality_event* head = stormEvents[hashTable[event->event_id % tableSize]->event_index]->f;
+      int eventIndex = search(hashTable, event->event_id, tableSize);
+
+      fatality_event* head = stormEvents[eventIndex]->f;
 
       if(head == NULL)
 	event->next = NULL;
@@ -181,7 +184,7 @@ void readFatalitiesFile(hash_table_entry**& hashTable, storm_event**& stormEvent
       else
 	event->next = head;
        
-      stormEvents[hashTable[event->event_id % tableSize]->event_index]->f = event;
+      stormEvents[eventIndex]->f = event;
 
       i++;
     }
@@ -346,12 +349,12 @@ void findEvent(annual_storms**& annualStorms, hash_table_entry**& hashTable, int
 {
   storm_event* event = new storm_event;
 
-  int eventIndex = search(hashTable, eventId, tableSize, numYears);
-  cout << "Event Index: " << eventIndex << endl;
+  int eventIndex = search(hashTable, eventId, tableSize);
+  int year = searchYear(hashTable, eventId, tableSize);
+
+  //sets event pointer to correct event
   if(eventIndex != -1)
     {
-      int year = searchYear(hashTable, eventId, tableSize, numYears);
-
       for(int i = 0; i < numYears; i++)
 	{
 	  if(annualStorms[i]->year == year)
@@ -364,6 +367,7 @@ void findEvent(annual_storms**& annualStorms, hash_table_entry**& hashTable, int
 	    }
 	}
 
+      //prints out attributes
       cout << "Event ID: " << event->event_id << endl;
       cout << "State: " << event->state << endl;
       cout << "Year: " << event->year << endl;
@@ -380,8 +384,11 @@ void findEvent(annual_storms**& annualStorms, hash_table_entry**& hashTable, int
       cout << "Tornado Fujita Scale: " << event->tor_f_scale << endl << endl;
 
       fatality_event* current = event->f;
+      int fatalityCount = getFatalitySize(current);
+
       if(current != NULL)
 	{ 
+	  cout << "Fatality Number: " << fatalityCount << endl;
 	  while(current != NULL)
 	    {
 	      cout << "Fatality ID: " << current->fatality_id << endl;
@@ -399,12 +406,12 @@ void findEvent(annual_storms**& annualStorms, hash_table_entry**& hashTable, int
 	cout << "No fatalities" << endl << endl;
     }
   else
-    cout << "Event ID not found" << endl;
+    cout << "Event ID not found" << endl << endl;
 
 }
 
 //search for hash table entry
-int search(hash_table_entry**& hashTable, int eventId, int tableSize, int numYears)
+int search(hash_table_entry**& hashTable, int eventId, int tableSize)
 {
   int foundKey = -1;
   int hash = eventId % tableSize;
@@ -421,7 +428,7 @@ int search(hash_table_entry**& hashTable, int eventId, int tableSize, int numYea
 }
 
 //returns year of the event
-int searchYear(hash_table_entry**& hashTable, int eventId, int tableSize, int numYears)
+int searchYear(hash_table_entry**& hashTable, int eventId, int tableSize)
 {
   int year = -1;
   int hash = eventId % tableSize;
@@ -450,6 +457,19 @@ int getLinkedListSize(hash_table_entry**& hashTable, int index)
   return count;
 }
 
+//returns size of fatality linked list
+int getFatalitySize(fatality_event* current)
+{
+  int count = 0;
+  while(current != NULL)
+    {
+      count++;
+      current = current->next;
+    }
+  return count;
+}
+
+//returns maximum chain length
 int findMax(int* array, int size)
 {
   int max = 0;
@@ -461,6 +481,7 @@ int findMax(int* array, int size)
   return max;
 }
 
+//returns the count of each chain length
 int getCount(int* array, int target, int size)
 {
   int count = 0;
