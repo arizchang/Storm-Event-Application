@@ -17,6 +17,8 @@ void findEvent(annual_storms**&, hash_table_entry**&, int, int, int);
 int search(hash_table_entry**&, int, int, int);
 int searchYear(hash_table_entry**&, int, int, int);
 int getLinkedListSize(hash_table_entry**&, int);
+int findMax(int*, int);
+int getCount(int*, int, int);
 
 using namespace std;
 
@@ -97,12 +99,18 @@ int main(int argc, char** argv)
       findEvent(annualStorms, hashTable, theEventId, tableSize, numYears);
     }
 
-  cout << "Table Size: " << tableSize << endl;
   //printing out summary of hash table
+  int* chainLengths = new int[tableSize];
   for(int i = 0; i < tableSize; i++)
     {
-      cout << getLinkedListSize(hashTable, i) << endl;
+      chainLengths[i] = getLinkedListSize(hashTable, i);
     }
+
+  cout << "Chain Length(N)\t\tNumber of Chains with Length N" << endl;
+  int max = findMax(chainLengths, tableSize);
+  for(int i = 0; i <= max; i++)
+    cout << i << "\t\t\t" << getCount(chainLengths, i, tableSize) << endl;
+
   float loadFactor = (float)totalNumEvents/(float)tableSize;
   cout << "Load Factor: " << loadFactor << endl;
   return 0;
@@ -438,6 +446,28 @@ int getLinkedListSize(hash_table_entry**& hashTable, int index)
     {
       count++;
       current = current->next;
+    }
+  return count;
+}
+
+int findMax(int* array, int size)
+{
+  int max = 0;
+  for(int i = 0; i < size; i++)
+    {
+      if(array[i] > max)
+	max = array[i];
+    }
+  return max;
+}
+
+int getCount(int* array, int target, int size)
+{
+  int count = 0;
+  for(int i = 0; i < size; i++)
+    {
+      if(array[i] == target)
+	count++;
     }
   return count;
 }
