@@ -101,13 +101,8 @@ int main(int argc, char** argv)
   //printing out summary of hash table
   for(int i = 0; i < tableSize; i++)
     {
-      if(hashTable[i] != NULL)
-	cout << hashTable[i]->event_id << endl;
-      else
-	cout << endl;
-      //cout << getLinkedListSize(hashTable, i) << endl;
+      cout << getLinkedListSize(hashTable, i) << endl;
     }
-
   cout << "Out?" << endl;
   return 0;
 }
@@ -169,8 +164,14 @@ void readFatalitiesFile(hash_table_entry**& hashTable, storm_event**& stormEvent
       getline(iss, token, ',');
       event->fatality_location = token;
 
-      event->next = NULL;
+      fatality_event* head = stormEvents[hashTable[event->event_id % tableSize]->event_index]->f;
 
+      if(head == NULL)
+	event->next = NULL;
+
+      else
+	event->next = head;
+       
       stormEvents[hashTable[event->event_id % tableSize]->event_index]->f = event;
 
       i++;
@@ -369,15 +370,21 @@ void findEvent(annual_storms**& annualStorms, hash_table_entry**& hashTable, int
       cout << "Crop Damage: $" << event->damage_crops << endl;
       cout << "Tornado Fujita Scale: " << event->tor_f_scale << endl << endl;
 
-      if(event->f != NULL)
-	{  
-	  cout << "Fatality ID: " << event->f->fatality_id << endl;
-	  cout << "Event ID: " << event->f->event_id << endl;
-	  cout << "Fatality Type: " << event->f->fatality_type << endl;
-	  cout << "Fatality Date: " << event->f->fatality_date << endl;
-	  cout << "Fatality Age: " << event->f->fatality_age << endl;
-	  cout << "Fatality Sex: " << event->f->fatality_sex << endl;
-	  cout << "Fatality Location: " << event->f->fatality_location << endl << endl;
+      fatality_event* current = event->f;
+      if(current != NULL)
+	{ 
+	  while(current != NULL)
+	    {
+	      cout << "Fatality ID: " << event->f->fatality_id << endl;
+	      cout << "Event ID: " << event->f->event_id << endl;
+	      cout << "Fatality Type: " << event->f->fatality_type << endl;
+	      cout << "Fatality Date: " << event->f->fatality_date << endl;
+	      cout << "Fatality Age: " << event->f->fatality_age << endl;
+	      cout << "Fatality Sex: " << event->f->fatality_sex << endl;
+	      cout << "Fatality Location: " << event->f->fatality_location << endl << endl;
+	      current = event->f->next;
+	    } 
+	  
 	}
       else
 	cout << "No fatalities" << endl << endl;
