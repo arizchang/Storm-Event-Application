@@ -46,6 +46,8 @@ int main(int argc, char** argv)
   //initializing hash table
   int tableSize = hashTableSize(totalNumEvents);
   hash_table_entry** hashTable = new hash_table_entry*[tableSize];
+  for(int i = 0; i < tableSize; i++)
+    hashTable[i] = NULL;
 
   //filling in arrays of storm events
   for(int i = 0; i < numYears; i++)
@@ -70,7 +72,6 @@ int main(int argc, char** argv)
 
   //cout << annualStorms[0]->events[hashTable[10120406 % tableSize]->event_index]->state << endl;
 
-  cout << "Table Size: " << tableSize << endl;  
   //beginning of queries
   int numQueries = 0;
   string querie = "";
@@ -96,14 +97,18 @@ int main(int argc, char** argv)
       findEvent(annualStorms, hashTable, theEventId, tableSize, numYears);
     }
 
+  cout << "Table Size: " << tableSize << endl;
   //printing out summary of hash table
   for(int i = 0; i < tableSize; i++)
     {
-      cout << getLinkedListSize(hashTable, i) << endl;
+      if(hashTable[i] != NULL)
+	cout << hashTable[i]->event_id << endl;
+      else
+	cout << endl;
+      //cout << getLinkedListSize(hashTable, i) << endl;
     }
 
-  delete hashTable;
-  delete annualStorms;
+  cout << "Out?" << endl;
   return 0;
 }
 
@@ -164,6 +169,8 @@ void readFatalitiesFile(hash_table_entry**& hashTable, storm_event**& stormEvent
       getline(iss, token, ',');
       event->fatality_location = token;
 
+      event->next = NULL;
+
       stormEvents[hashTable[event->event_id % tableSize]->event_index]->f = event;
 
       i++;
@@ -204,7 +211,6 @@ void readDetailsFile(hash_table_entry**& hashTable, storm_event**& stormEvents, 
 	  entry->year = stoi(token);
 	}
 
-      //fills in attributes of the event
       getline(iss, token, ',');
       event->month_name = token;
 
@@ -258,6 +264,7 @@ void readDetailsFile(hash_table_entry**& hashTable, storm_event**& stormEvents, 
 
       event->f = NULL;
       entry->event_index = i;
+      entry->next = NULL;
 
       //insert event into array of storm events and hash table
       stormEvents[i] = event;
@@ -268,6 +275,7 @@ void readDetailsFile(hash_table_entry**& hashTable, storm_event**& stormEvents, 
     }
 }
 
+//turns K or M into 1000 or 1000000
 int numberfy(string str)
 {
   float num = 0;
@@ -286,6 +294,7 @@ int numberfy(string str)
   return (int)num;
 }
 
+//tests if number is prime
 bool testForPrime(int val)
 {
   int limit, factor = 2;
@@ -306,6 +315,7 @@ int hashTableSize(int num)
   return num;
 }
 
+//inserts event into hash table
 void insertHashedEvent(hash_table_entry** &hashTable, hash_table_entry* &entry, int tableSize)
 {
   int hash = entry->event_id % tableSize;
@@ -321,6 +331,7 @@ void insertHashedEvent(hash_table_entry** &hashTable, hash_table_entry* &entry, 
   hashTable[hash] = entry;
 }
 
+//prints out event if found
 void findEvent(annual_storms**& annualStorms, hash_table_entry**& hashTable, int eventId, int tableSize, int numYears)
 {
   storm_event* event = new storm_event;
@@ -376,6 +387,7 @@ void findEvent(annual_storms**& annualStorms, hash_table_entry**& hashTable, int
 
 }
 
+//search for hash table entry
 int search(hash_table_entry**& hashTable, int eventId, int tableSize, int numYears)
 {
   int foundKey = -1;
@@ -409,6 +421,7 @@ int searchYear(hash_table_entry**& hashTable, int eventId, int tableSize, int nu
   return year;
 }
 
+//returns the size of a single chain in hash table
 int getLinkedListSize(hash_table_entry**& hashTable, int index)
 {
   int count = 0;
