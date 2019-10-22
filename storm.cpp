@@ -103,7 +103,8 @@ int main(int argc, char** argv)
     {
       cout << getLinkedListSize(hashTable, i) << endl;
     }
-  cout << "Out?" << endl;
+  float loadFactor = (float)totalNumEvents/(float)tableSize;
+  cout << "Load Factor: " << loadFactor << endl;
   return 0;
 }
 
@@ -375,14 +376,14 @@ void findEvent(annual_storms**& annualStorms, hash_table_entry**& hashTable, int
 	{ 
 	  while(current != NULL)
 	    {
-	      cout << "Fatality ID: " << event->f->fatality_id << endl;
-	      cout << "Event ID: " << event->f->event_id << endl;
-	      cout << "Fatality Type: " << event->f->fatality_type << endl;
-	      cout << "Fatality Date: " << event->f->fatality_date << endl;
-	      cout << "Fatality Age: " << event->f->fatality_age << endl;
-	      cout << "Fatality Sex: " << event->f->fatality_sex << endl;
-	      cout << "Fatality Location: " << event->f->fatality_location << endl << endl;
-	      current = event->f->next;
+	      cout << "Fatality ID: " << current->fatality_id << endl;
+	      cout << "Event ID: " << current->event_id << endl;
+	      cout << "Fatality Type: " << current->fatality_type << endl;
+	      cout << "Fatality Date: " << current->fatality_date << endl;
+	      cout << "Fatality Age: " << current->fatality_age << endl;
+	      cout << "Fatality Sex: " << current->fatality_sex << endl;
+	      cout << "Fatality Location: " << current->fatality_location << endl << endl;
+	      current = current->next;
 	    } 
 	  
 	}
