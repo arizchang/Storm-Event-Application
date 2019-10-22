@@ -14,8 +14,8 @@ bool testForPrime(int);
 int hashTableSize(int);
 void insertHashedEvent(hash_table_entry**&, hash_table_entry*&, int);
 void findEvent(annual_storms**&, hash_table_entry**&, int, int, int);
-int search(annual_storms**&, hash_table_entry**&, int, int, int);
-int searchYear(annual_storms**&, hash_table_entry**&, int, int, int);
+int search(hash_table_entry**&, int, int, int);
+int searchYear(hash_table_entry**&, int, int, int);
 int getLinkedListSize(hash_table_entry**&, int);
 
 using namespace std;
@@ -69,7 +69,8 @@ int main(int argc, char** argv)
     }
 
   //cout << annualStorms[0]->events[hashTable[10120406 % tableSize]->event_index]->state << endl;
-  
+
+  cout << "Table Size: " << tableSize << endl;  
   //beginning of queries
   int numQueries = 0;
   string querie = "";
@@ -83,10 +84,8 @@ int main(int argc, char** argv)
 
   for(int i = 0; i < numQueries; i++)
     {
-      //cin >> querie;
-      //int eventId = stoi(querie);
+      //reading and parsing the querie
       getline(cin, querie);
-
       istringstream parser;
       parser.str(querie);
       parser >> querieType;
@@ -324,13 +323,13 @@ void insertHashedEvent(hash_table_entry** &hashTable, hash_table_entry* &entry, 
 
 void findEvent(annual_storms**& annualStorms, hash_table_entry**& hashTable, int eventId, int tableSize, int numYears)
 {
-  int hash = eventId % tableSize;
   storm_event* event = new storm_event;
-  int eventIndex = search(annualStorms, hashTable, eventId, tableSize, numYears);
 
+  int eventIndex = search(hashTable, eventId, tableSize, numYears);
+  cout << "Event Index: " << eventIndex << endl;
   if(eventIndex != -1)
     {
-      int year = searchYear(annualStorms, hashTable, eventId, tableSize, numYears);
+      int year = searchYear(hashTable, eventId, tableSize, numYears);
 
       for(int i = 0; i < numYears; i++)
 	{
@@ -377,7 +376,7 @@ void findEvent(annual_storms**& annualStorms, hash_table_entry**& hashTable, int
 
 }
 
-int search(annual_storms**& annualStorms, hash_table_entry**& hashTable, int eventId, int tableSize, int numYears)
+int search(hash_table_entry**& hashTable, int eventId, int tableSize, int numYears)
 {
   int foundKey = -1;
   int hash = eventId % tableSize;
@@ -394,7 +393,7 @@ int search(annual_storms**& annualStorms, hash_table_entry**& hashTable, int eve
 }
 
 //returns year of the event
-int searchYear(annual_storms**& annualStorms, hash_table_entry**& hashTable, int eventId, int tableSize, int numYears)
+int searchYear(hash_table_entry**& hashTable, int eventId, int tableSize, int numYears)
 {
   int year = -1;
   int hash = eventId % tableSize;
