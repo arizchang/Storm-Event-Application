@@ -20,6 +20,8 @@ int getLinkedListSize(hash_table_entry**&, int);
 int getFatalitySize(fatality_event*);
 int findMax(int*, int);
 int getCount(int*, int, int);
+void maxHeapify(int*&, int, int);
+void buildMaxHeap(int*&, int);
 
 using namespace std;
 
@@ -491,4 +493,36 @@ int getCount(int* array, int target, int size)
 	count++;
     }
   return count;
+}
+
+//maintains the max heap property of the heap
+void maxHeapify(int*& array, int i, int n)
+{
+  int largest = 0;
+  int temp = 0;
+  int left = 2 * i + 1; //position of left child
+  int right  = 2 * i + 2; //position of right child
+
+  if(left <= n && array[left] > array[right])
+    largest = left;
+  else
+    largest = i;
+
+  if(right <= n && array[right] > array[largest])
+    largest = right;
+
+  if(largest != i)
+    {
+      temp = array[i];
+      array[i] = array[largest];
+      array[largest] = temp;
+      maxHeapify(array, largest, n);
+    }
+}
+
+//constructs a max heap using maxHeapify
+void buildMaxHeap(int*& array, int n)
+{
+  for(int i = n/2 - 1; i >= 0; i--)
+    maxHeapify(array, i, n);
 }
