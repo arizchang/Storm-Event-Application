@@ -22,6 +22,7 @@ int findMax(int*, int);
 int getCount(int*, int, int);
 void maxHeapify(int*&, int, int);
 void buildMaxHeap(int*&, int);
+void findMaxFatality();
 
 using namespace std;
 
@@ -81,9 +82,12 @@ int main(int argc, char** argv)
   int numQueries = 0;
   string querie = "";
   int theEventId = 0;
-  string querieType = "";
-  string querieEvent = "";
-  string querieEventId = "";
+  string word1 = "";
+  string word2 = "";
+  string word3 = "";
+  string word4 = "";
+  string word5 = "";
+
   cout << "How many queries? ";
   cin >> numQueries;
   getline(cin, querie);
@@ -94,12 +98,38 @@ int main(int argc, char** argv)
       getline(cin, querie);
       istringstream parser;
       parser.str(querie);
-      parser >> querieType;
-      parser >> querieEvent;
-      parser >> querieEventId;
-      theEventId = stoi(querieEventId);
+      parser >> word1;
+      parser >> word2;
+
+      //find event querie
+      if(word1 == "find" && word2 == "event")
+	{
+	  parser >> word3;
+	  theEventId = stoi(word3);
       
-      findEvent(annualStorms, hashTable, theEventId, tableSize, numYears);
+	  findEvent(annualStorms, hashTable, theEventId, tableSize, numYears);
+	}
+
+      //find max queries      
+      else if(word1 == "find" && word2 == "max")
+	{
+	  parser >> word3;
+
+	  //find max fatality
+	  if(word3 == "fatality")
+	    {
+	      parser >> word4;
+	      parser >> word5;
+	      int fatalityNum = stoi(word4);
+	      int year = stoi(word5);
+	    }
+
+	  //find max
+	  else
+	    {
+
+	    }
+	}
     }
 
   //printing out summary of hash table
