@@ -20,9 +20,9 @@ int getLinkedListSize(hash_table_entry**&, int);
 int getFatalitySize(fatality_event*);
 int findMax(int*, int);
 int getCount(int*, int, int);
-void maxHeapify(int*&, int, int);
-void buildMaxHeap(int*&, int);
-void findMaxFatality();
+void maxHeapifyFatality(storm_event**&, int, int);
+void buildMaxHeapFatality(storm_event**&, int);
+void findMaxFatality(storm_event**&, int, int);
 
 using namespace std;
 
@@ -72,11 +72,10 @@ int main(int argc, char** argv)
       //making new annual_storms struct
       annual_storms* aYearOfStorms = new annual_storms;
       aYearOfStorms->year = stoi(years[i]);
+      aYearOfStorms->numStorms = detailsLineCount - 1;
       aYearOfStorms->events = stormEvents;
       annualStorms[i] = aYearOfStorms;
     }
-
-  //cout << annualStorms[0]->events[hashTable[10120406 % tableSize]->event_index]->state << endl;
 
   //beginning of queries
   int numQueries = 0;
@@ -104,7 +103,7 @@ int main(int argc, char** argv)
       //find event querie
       if(word1 == "find" && word2 == "event")
 	{
-	  parser >> word3;
+	  parser >> word3; //event id
 	  theEventId = stoi(word3);
       
 	  findEvent(annualStorms, hashTable, theEventId, tableSize, numYears);
@@ -118,10 +117,30 @@ int main(int argc, char** argv)
 	  //find max fatality
 	  if(word3 == "fatality")
 	    {
-	      parser >> word4;
-	      parser >> word5;
+	      parser >> word4; //number
+	      parser >> word5; //year
 	      int fatalityNum = stoi(word4);
 	      int year = stoi(word5);
+
+	      for(int i = 0; i < numYears; i++)
+		{
+		  if(annualStorms[i]->year == year)
+		    {
+		      storm_event** newEvents = new storm_event*[annualStorms[i]->numStorms]; //new array of storm events to be max heapified
+		      
+		      //copying events over to new array
+		      for(int j = 0; j < annualStorms[i]->numStorms; j++)
+			newEvents[j] = annualStorms[i]->events[j];
+
+		      buildMaxHeapFatality(newEvents, annualStorms[i]->numStorms); //builds max heap
+		      findMaxFatality(newEvents, fatalityNum, year);
+
+		      i = numYears;
+		    } 
+
+		  else if(i == numYears - 1)
+		    cout << "No data for that year" << endl;
+		}
 	    }
 
 	  //find max
@@ -526,19 +545,19 @@ int getCount(int* array, int target, int size)
 }
 
 //maintains the max heap property of the heap
-void maxHeapify(int*& array, int i, int n)
+void maxHeapifyFatality(storm_event**& array, int i, int n)
 {
   int largest = 0;
-  int temp = 0;
+  storm_event* temp = NULL;
   int left = 2 * i + 1; //position of left child
   int right  = 2 * i + 2; //position of right child
 
-  if(left <= n && array[left] > array[right])
+  if(left <= n && getFatalitySize(array[left]->f) > getFatalitySize(array[right]->f))
     largest = left;
   else
     largest = i;
 
-  if(right <= n && array[right] > array[largest])
+  if(right <= n && getFatalitySize(array[right]->f) > getFatalitySize(array[largest]->f))
     largest = right;
 
   if(largest != i)
@@ -546,13 +565,21 @@ void maxHeapify(int*& array, int i, int n)
       temp = array[i];
       array[i] = array[largest];
       array[largest] = temp;
-      maxHeapify(array, largest, n);
+      maxHeapifyFatality(array, largest, n);
     }
 }
 
 //constructs a max heap using maxHeapify
-void buildMaxHeap(int*& array, int n)
+void buildMaxHeapFatality(storm_event**& array, int n)
 {
   for(int i = n/2 - 1; i >= 0; i--)
-    maxHeapify(array, i, n);
+    maxHeapifyFatality(array, i, n);
+}
+
+void findMaxFatality(storm_event**& array, int num, int year)
+{
+  cout << num << " of the most fatal storms in " << year << ": " << endl;
+
+  for(int i = 0; i < num; i++)
+    cout << array[i]->event_id << endl;
 }
