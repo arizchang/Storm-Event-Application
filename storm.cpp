@@ -132,7 +132,7 @@ int main(int argc, char** argv)
 		      for(int j = 0; j < annualStorms[i]->numStorms; j++)
 			newEvents[j] = annualStorms[i]->events[j];
 
-		      buildMaxHeapFatality(newEvents, annualStorms[i]->numStorms); //builds max heap
+		      buildMaxHeapFatality(newEvents, annualStorms[i]->numStorms); //builds max heap //seg fault happening somewhere in here or in findMaxFatality
 		      findMaxFatality(newEvents, fatalityNum, year);
 
 		      i = numYears;
@@ -547,17 +547,17 @@ int getCount(int* array, int target, int size)
 //maintains the max heap property of the heap
 void maxHeapifyFatality(storm_event**& array, int i, int n)
 {
-  int largest = 0;
+  int largest = i;
   storm_event* temp = NULL;
   int left = 2 * i + 1; //position of left child
   int right  = 2 * i + 2; //position of right child
 
-  if(left <= n && getFatalitySize(array[left]->f) > getFatalitySize(array[right]->f))
+  if(left < n && getFatalitySize(array[left]->f) > getFatalitySize(array[largest]->f))
     largest = left;
   else
     largest = i;
 
-  if(right <= n && getFatalitySize(array[right]->f) > getFatalitySize(array[largest]->f))
+  if(right < n && getFatalitySize(array[right]->f) > getFatalitySize(array[largest]->f))
     largest = right;
 
   if(largest != i)
