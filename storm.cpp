@@ -22,7 +22,13 @@ int findMax(int*, int);
 int getCount(int*, int, int);
 void maxHeapifyFatality(storm_event**&, int, int);
 void buildMaxHeapFatality(storm_event**&, int);
-void findMaxFatality(storm_event**&, int, int);
+void heapSortFatality(storm_event**&, int);
+void findMaxFatality(storm_event**&, int, int, int);
+void maxHeapifyPropertyDamage(storm_event**&, int, int);
+void buildMaxHeapPropertyDamage(storm_event**&, int);
+void heapSortPropertyDamage(storm_event**&, int);
+void findMaxPropertyDamage(storm_event**&, int, int, int);
+
 
 using namespace std;
 
@@ -132,8 +138,9 @@ int main(int argc, char** argv)
 		      for(int j = 0; j < annualStorms[i]->numStorms; j++)
 			newEvents[j] = annualStorms[i]->events[j];
 
-		      buildMaxHeapFatality(newEvents, annualStorms[i]->numStorms); //builds max heap //seg fault happening somewhere in here or in findMaxFatality
-		      findMaxFatality(newEvents, fatalityNum, year);
+		      heapSortFatality(newEvents, annualStorms[i]->numStorms);
+		      findMaxFatality(newEvents, fatalityNum, year, annualStorms[i]->numStorms);
+		      delete newEvents;
 
 		      i = numYears;
 		    } 
@@ -146,7 +153,43 @@ int main(int argc, char** argv)
 	  //find max
 	  else
 	    {
+	      parser >> word4;
+	      parser >> word5;
 
+	      int topNum = stoi(word3);
+	      int year = stoi(word4);
+	      string damageType = word5;
+
+	      //top property damage amounts
+	      if(damageType == "damage_property")
+		{
+		  for(int i = 0; i < numYears; i++)
+		    {
+		      if(annualStorms[i]->year == year)
+			{
+			  storm_event** newEvents = new storm_event*[annualStorms[i]->numStorms]; //new array of storm events to be max heapified
+		      
+			  //copying events over to new array
+			  for(int j = 0; j < annualStorms[i]->numStorms; j++)
+			    newEvents[j] = annualStorms[i]->events[j];
+
+			  heapSortPropertyDamage(newEvents, annualStorms[i]->numStorms);
+			  findMaxPropertyDamage(newEvents, topNum, year, annualStorms[i]->numStorms);
+			  delete newEvents;
+
+			  i = numYears;
+			} 
+
+		      else if(i == numYears - 1)
+			cout << "No data for that year" << endl;
+		    }
+		}
+	      
+	      //top crop damage amounts
+	      else if(damageType == "damage_crops")
+		{
+
+		}
 	    }
 	}
     }
@@ -576,10 +619,89 @@ void buildMaxHeapFatality(storm_event**& array, int n)
     maxHeapifyFatality(array, i, n);
 }
 
-void findMaxFatality(storm_event**& array, int num, int year)
+void findMaxFatality(storm_event**& array, int num, int year, int size)
 {
-  cout << num << " of the most fatal storms in " << year << ": " << endl;
+  cout << num << " of the most fatal storms in " << year << ": " << endl << endl;
 
-  for(int i = 0; i < num; i++)
-    cout << array[i]->event_id << endl;
+  for(int i = size-1; i >= size-num; i--)
+    {
+      cout << "Event ID: " << array[i]->event_id << endl;
+      cout << "Number of fatalities: " << getFatalitySize(array[i]->f) << endl << endl;
+    }
+}
+
+//heapsort
+void heapSortFatality(storm_event**& array, int n)
+{
+  storm_event* temp = NULL;
+
+  buildMaxHeapFatality(array, n); //builds max heap
+
+  for(int i = n-1; i >= 0; i--)
+    {
+      temp = array[0];
+      array[0] = array[i];
+      array[i] = temp;
+      maxHeapifyFatality(array, 0, i);
+    }
+}
+
+//maintains the max heap property of the heap
+void maxHeapifyPropertyDamage(storm_event**& array, int i, int n)
+{
+  int largest = i;
+  storm_event* temp = NULL;
+  int left = 2 * i + 1; //position of left child
+  int right  = 2 * i + 2; //position of right child
+
+  if(left < n && array[left]->damage_property > array[largest]->damage_property)
+    largest = left;
+  else
+    largest = i;
+
+  if(right < n && array[right]->damage_property > array[largest]->damage_property)
+    largest = right;
+
+  if(largest != i)
+    {
+      temp = array[i];
+      array[i] = array[largest];
+      array[largest] = temp;
+      maxHeapifyPropertyDamage(array, largest, n);
+    }
+}
+
+//constructs a max heap using maxHeapify
+void buildMaxHeapPropertyDamage(storm_event**& array, int n)
+{
+  for(int i = n/2 - 1; i >= 0; i--)
+    maxHeapifyPropertyDamage(array, i, n);
+}
+
+void findMaxPropertyDamage(storm_event**& array, int num, int year, int size)
+{
+  cout << num << " of the most costly damages to property in " << year << ": " << endl << endl;
+
+  for(int i = size-1; i >= size-num; i--)
+    {
+      cout << "Event ID: " << array[i]->event_id << endl;
+      cout << "Event Type: " << array[i]->event_type << endl;
+      cout << "Damage to Property: $" << array[i]->damage_property << endl << endl;
+    }
+}
+
+//heapsort
+void heapSortPropertyDamage(storm_event**& array, int n)
+{
+  storm_event* temp = NULL;
+
+  buildMaxHeapPropertyDamage(array, n); //builds max heap
+
+  for(int i = n-1; i >= 0; i--)
+    {
+      temp = array[0];
+      array[0] = array[i];
+      array[i] = temp;
+      maxHeapifyPropertyDamage(array, 0, i);
+    }
 }
