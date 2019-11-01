@@ -31,7 +31,7 @@ void findMaxPropertyDamage(storm_event**&, int, string, int);
 void maxHeapifyCropDamage(storm_event**&, int, int);
 void buildMaxHeapCropDamage(storm_event**&, int);
 void heapSortCropDamage(storm_event**&, int);
-void findMaxCropDamage(storm_event**&, int, int, int);
+void findMaxCropDamage(storm_event**&, int, string, int);
 
 using namespace std;
 
@@ -268,26 +268,58 @@ int main(int argc, char** argv)
 	      //top crop damage amounts
 	      else if(damageType == "damage_crops")
 		{
-		  int year = stoi(word4);
-		  for(int i = 0; i < numYears; i++)
+		  //all years
+		  if(word4 == "all")
 		    {
-		      if(annualStorms[i]->year == year)
+		      //determining total number of storm events among all years
+		      for(int i = 0; i < numYears; i++)
+			numStorms += annualStorms[i]->numStorms;
+
+		      storm_event** newEvents = new storm_event*[numStorms];
+
+		      //copying storm events into new array
+		      int count = 0;
+		      for(int i = 0; i < numYears; i++)
 			{
-			  storm_event** newEvents = new storm_event*[annualStorms[i]->numStorms]; //new array of storm events to be max heapified
-		      
-			  //copying events over to new array
 			  for(int j = 0; j < annualStorms[i]->numStorms; j++)
-			    newEvents[j] = annualStorms[i]->events[j];
+			    {
+			      newEvents[count] = annualStorms[i]->events[j];
+			      count++;
+			    }
+			}
 
-			  heapSortCropDamage(newEvents, annualStorms[i]->numStorms);
-			  findMaxCropDamage(newEvents, topNum, year, annualStorms[i]->numStorms);
-			  delete newEvents;
+		      string year = "all years";
+		      heapSortCropDamage(newEvents, numStorms);
+		      findMaxCropDamage(newEvents, topNum, year, numStorms);
+		      delete newEvents;
+		    }
+		  
+		  //a specific year is chosen
+		  else
+		    {
+		      int year = stoi(word4);
+		      for(int i = 0; i < numYears; i++)
+			{
+			  if(annualStorms[i]->year == year)
+			    {
+			      storm_event** newEvents = new storm_event*[annualStorms[i]->numStorms]; //new array of storm events to be max heapified
+			      numStorms = annualStorms[i]->numStorms;
+		      
+			      //copying events over to new array
+			      for(int j = 0; j < numStorms; j++)
+				newEvents[j] = annualStorms[i]->events[j];
 
-			  i = numYears;
-			} 
 
-		      else if(i == numYears - 1)
-			cout << "No data for that year" << endl;
+			      heapSortCropDamage(newEvents, numStorms);
+			      findMaxCropDamage(newEvents, topNum, word4, numStorms);
+			      delete newEvents;
+
+			      i = numYears;
+			    } 
+
+			  else if(i == numYears - 1)
+			    cout << "No data for that year" << endl;
+			}
 		    }
 		}
 	    }
@@ -849,7 +881,7 @@ void buildMaxHeapCropDamage(storm_event**& array, int n)
 }
 
 //prints out n most damaging storm events to crops
-void findMaxCropDamage(storm_event**& array, int num, int year, int size)
+void findMaxCropDamage(storm_event**& array, int num, string year, int size)
 {
   cout << num << " of the most costly damages to property in " << year << ": " << endl << endl;
 
