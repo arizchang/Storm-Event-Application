@@ -27,7 +27,7 @@ void findMaxFatality(storm_event**&, int, string, int);
 void maxHeapifyPropertyDamage(storm_event**&, int, int);
 void buildMaxHeapPropertyDamage(storm_event**&, int);
 void heapSortPropertyDamage(storm_event**&, int);
-void findMaxPropertyDamage(storm_event**&, int, int, int);
+void findMaxPropertyDamage(storm_event**&, int, string, int);
 void maxHeapifyCropDamage(storm_event**&, int, int);
 void buildMaxHeapCropDamage(storm_event**&, int);
 void heapSortCropDamage(storm_event**&, int);
@@ -122,6 +122,7 @@ int main(int argc, char** argv)
       else if(word1 == "find" && word2 == "max")
 	{
 	  parser >> word3;
+	  int numStorms = 0;
 
 	  //find max fatality
 	  if(word3 == "fatality")
@@ -129,7 +130,6 @@ int main(int argc, char** argv)
 	      parser >> word4; //number
 	      parser >> word5; //year
 	      int fatalityNum = stoi(word4);
-	      int numStorms = 0;
 
 	      //"all" is entered
 	      if(word5 == "all")
@@ -187,10 +187,15 @@ int main(int argc, char** argv)
 
 	      //print count of nodes in max heap and height
 	      int height = (int)(log2 (numStorms));
+	      int rightHeight = height - 1;
+	      int leftHeight = height - 1;
+	      if(numStorms < (pow(2, height+1) - 1 - pow(2, height)/2))
+		rightHeight = height - 2;
+
 	      cout << "Total number of nodes in max-heap: " << numStorms << endl;
 	      cout << "Height of tree: " << height << endl;
-	      cout << "Height of left subtree: " << height-1 << endl;
-	      cout << "Height of right subtree: " << height-1 << endl << endl;
+	      cout << "Height of left subtree: " << leftHeight << endl;
+	      cout << "Height of right subtree: " << rightHeight << endl << endl;
 	    }
 
 	  //find max
@@ -200,37 +205,70 @@ int main(int argc, char** argv)
 	      parser >> word5;
 
 	      int topNum = stoi(word3);
-	      int year = stoi(word4);
 	      string damageType = word5;
 
 	      //top property damage amounts
 	      if(damageType == "damage_property")
 		{
-		  for(int i = 0; i < numYears; i++)
+		  //all years
+		  if(word4 == "all")
 		    {
-		      if(annualStorms[i]->year == year)
+		      //determining total number of storm events among all years
+		      for(int i = 0; i < numYears; i++)
+			numStorms += annualStorms[i]->numStorms;
+
+		      storm_event** newEvents = new storm_event*[numStorms];
+
+		      //copying storm events into new array
+		      int count = 0;
+		      for(int i = 0; i < numYears; i++)
 			{
-			  storm_event** newEvents = new storm_event*[annualStorms[i]->numStorms]; //new array of storm events to be max heapified
-		      
-			  //copying events over to new array
 			  for(int j = 0; j < annualStorms[i]->numStorms; j++)
-			    newEvents[j] = annualStorms[i]->events[j];
+			    {
+			      newEvents[count] = annualStorms[i]->events[j];
+			      count++;
+			    }
+			}
 
-			  heapSortPropertyDamage(newEvents, annualStorms[i]->numStorms);
-			  findMaxPropertyDamage(newEvents, topNum, year, annualStorms[i]->numStorms);
-			  delete newEvents;
+		      string year = "all years";
+		      heapSortPropertyDamage(newEvents, numStorms);
+		      findMaxPropertyDamage(newEvents, topNum, year, numStorms);
+		      delete newEvents;
+		    }
+		  
+		  //a specific year is chosen
+		  else
+		    {
+		      int year = stoi(word4);
+		      for(int i = 0; i < numYears; i++)
+			{
+			  if(annualStorms[i]->year == year)
+			    {
+			      storm_event** newEvents = new storm_event*[annualStorms[i]->numStorms]; //new array of storm events to be max heapified
+			      numStorms = annualStorms[i]->numStorms;
+		      
+			      //copying events over to new array
+			      for(int j = 0; j < numStorms; j++)
+				newEvents[j] = annualStorms[i]->events[j];
 
-			  i = numYears;
-			} 
 
-		      else if(i == numYears - 1)
-			cout << "No data for that year" << endl;
+			      heapSortPropertyDamage(newEvents, numStorms);
+			      findMaxPropertyDamage(newEvents, topNum, word4, numStorms);
+			      delete newEvents;
+
+			      i = numYears;
+			    } 
+
+			  else if(i == numYears - 1)
+			    cout << "No data for that year" << endl;
+			}
 		    }
 		}
 	      
 	      //top crop damage amounts
 	      else if(damageType == "damage_crops")
 		{
+		  int year = stoi(word4);
 		  for(int i = 0; i < numYears; i++)
 		    {
 		      if(annualStorms[i]->year == year)
@@ -747,7 +785,7 @@ void buildMaxHeapPropertyDamage(storm_event**& array, int n)
 }
 
 //prints out n most damaging storm events to property
-void findMaxPropertyDamage(storm_event**& array, int num, int year, int size)
+void findMaxPropertyDamage(storm_event**& array, int num, string year, int size)
 {
   cout << num << " of the most costly damages to property in " << year << ": " << endl << endl;
 
