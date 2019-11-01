@@ -23,7 +23,7 @@ int getCount(int*, int, int);
 void maxHeapifyFatality(storm_event**&, int, int);
 void buildMaxHeapFatality(storm_event**&, int);
 void heapSortFatality(storm_event**&, int);
-void findMaxFatality(storm_event**&, int, int, int);
+void findMaxFatality(storm_event**&, int, string, int);
 void maxHeapifyPropertyDamage(storm_event**&, int, int);
 void buildMaxHeapPropertyDamage(storm_event**&, int);
 void heapSortPropertyDamage(storm_event**&, int);
@@ -81,7 +81,7 @@ int main(int argc, char** argv)
       //making new annual_storms struct
       annual_storms* aYearOfStorms = new annual_storms;
       aYearOfStorms->year = stoi(years[i]);
-      aYearOfStorms->numStorms = detailsLineCount - 1;
+      aYearOfStorms->numStorms = detailsLineCount;
       aYearOfStorms->events = stormEvents;
       annualStorms[i] = aYearOfStorms;
     }
@@ -129,28 +129,68 @@ int main(int argc, char** argv)
 	      parser >> word4; //number
 	      parser >> word5; //year
 	      int fatalityNum = stoi(word4);
-	      int year = stoi(word5);
+	      int numStorms = 0;
 
-	      for(int i = 0; i < numYears; i++)
+	      //"all" is entered
+	      if(word5 == "all")
 		{
-		  if(annualStorms[i]->year == year)
+		  //determining total number of storm events among all years
+		  for(int i = 0; i < numYears; i++)
+		    numStorms += annualStorms[i]->numStorms;
+
+		  storm_event** newEvents = new storm_event*[numStorms];
+
+		  //copying storm events into new array
+		  int count = 0;
+		  for(int i = 0; i < numYears; i++)
 		    {
-		      storm_event** newEvents = new storm_event*[annualStorms[i]->numStorms]; //new array of storm events to be max heapified
-		      
-		      //copying events over to new array
 		      for(int j = 0; j < annualStorms[i]->numStorms; j++)
-			newEvents[j] = annualStorms[i]->events[j];
+			{
+			  newEvents[count] = annualStorms[i]->events[j];
+			  count++;
+			}
+		    }
 
-		      heapSortFatality(newEvents, annualStorms[i]->numStorms);
-		      findMaxFatality(newEvents, fatalityNum, year, annualStorms[i]->numStorms);
-		      delete newEvents;
-
-		      i = numYears;
-		    } 
-
-		  else if(i == numYears - 1)
-		    cout << "No data for that year" << endl;
+		  string year = "all years";
+		  heapSortFatality(newEvents, numStorms);
+		  findMaxFatality(newEvents, fatalityNum, year, numStorms);
+		  delete newEvents;
 		}
+
+	      //a year is entered
+	      else
+		{
+		  int year = stoi(word5);
+
+		  for(int i = 0; i < numYears; i++)
+		    {
+		      if(annualStorms[i]->year == year)
+			{
+			  storm_event** newEvents = new storm_event*[annualStorms[i]->numStorms]; //new array of storm events to be max heapified
+			  numStorms = annualStorms[i]->numStorms;
+
+			  //copying events over to new array
+			  for(int j = 0; j < numStorms; j++)
+			    newEvents[j] = annualStorms[i]->events[j];
+
+			  heapSortFatality(newEvents, numStorms);
+			  findMaxFatality(newEvents, fatalityNum, word5, numStorms);
+			  delete newEvents;
+
+			  i = numYears;
+			} 
+
+		      else if(i == numYears - 1)
+			cout << "No data for that year" << endl;
+		    }
+		}
+
+	      //print count of nodes in max heap and height
+	      int height = (int)(log2 (numStorms));
+	      cout << "Total number of nodes in max-heap: " << numStorms << endl;
+	      cout << "Height of tree: " << height << endl;
+	      cout << "Height of left subtree: " << height-1 << endl;
+	      cout << "Height of right subtree: " << height-1 << endl << endl;
 	    }
 
 	  //find max
@@ -644,7 +684,7 @@ void buildMaxHeapFatality(storm_event**& array, int n)
 }
 
 //prints out the n most fatal storm events in that year
-void findMaxFatality(storm_event**& array, int num, int year, int size)
+void findMaxFatality(storm_event**& array, int num, string year, int size)
 {
   cout << num << " of the most fatal storms in " << year << ": " << endl << endl;
 
