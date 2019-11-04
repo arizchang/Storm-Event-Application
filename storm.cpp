@@ -548,6 +548,9 @@ bool testForPrime(int val)
 int hashTableSize(int num)
 {
   num = 2*num;
+
+  if(num == 2)
+    num++;
   while(!testForPrime(num))
     num++;
   return num;
