@@ -317,7 +317,8 @@ int main(int argc, char** argv)
 	  int height = (int)(log2 (numStorms));
 	  int rightHeight = height - 1;
 	  int leftHeight = height - 1;
-	  if(numStorms < (pow(2, height+1) - 1 - pow(2, height)/2))
+	  int cutOff = pow(2, height+1) - pow(2,height)/2;
+	  if(numStorms < cutOff)
 	    rightHeight = height - 2;
 
 	  cout << "Total number of nodes in max-heap: " << numStorms << endl;
