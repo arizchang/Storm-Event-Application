@@ -32,6 +32,8 @@ void maxHeapifyCropDamage(storm_event**&, int, int);
 void buildMaxHeapCropDamage(storm_event**&, int);
 void heapSortCropDamage(storm_event**&, int);
 void findMaxCropDamage(storm_event**&, int, string, int);
+void range(storm_event**&, int, string, string, string);
+void traverse(bst*, string, string);
 
 using namespace std;
 
@@ -322,6 +324,64 @@ int main(int argc, char** argv)
 	  cout << "Height of tree: " << height << endl;
 	  cout << "Height of left subtree: " << leftHeight << endl;
 	  cout << "Height of right subtree: " << rightHeight << endl << endl;
+	}
+
+      //range queries
+      else if(word1 == "range")
+	{
+	  int numStorms = 0;
+	  //range among all years
+	  if(word2 == "all")
+	    {
+	      //determining total number of storm events among all years
+	      for(int i = 0; i < numYears; i++)
+		numStorms += annualStorms[i]->numStorms;
+
+	      storm_event** newEvents = new storm_event*[numStorms];
+
+	      //copying storm events into new array
+	      int count = 0;
+	      for(int i = 0; i < numYears; i++)
+		{
+		  for(int j = 0; j < annualStorms[i]->numStorms; j++)
+		    {
+		      newEvents[count] = annualStorms[i]->events[j];
+		      count++;
+		    }
+		}
+
+	      string year = "all years";
+	      cout << "range all " << endl;
+	    }
+
+	  //range for a single year
+	  else
+	    {
+	      int year = stoi(word2);
+	      parser >> word3; //field name
+	      parser >> word4; //low
+	      parser >> word5; //high
+	      for(int i = 0; i < numYears; i++)
+		{
+		  if(annualStorms[i]->year == year)
+		    {
+		      storm_event** newEvents = new storm_event*[annualStorms[i]->numStorms]; //new array of storm events to be max heapified
+		      numStorms = annualStorms[i]->numStorms;
+
+		      //copying events over to new array
+		      for(int j = 0; j < numStorms; j++)
+			newEvents[j] = annualStorms[i]->events[j];
+
+		      cout << "Range " << year << endl;
+		      range(newEvents, numStorms, word3, word4, word5);
+
+		      i = numYears;
+		    } 
+
+		  else if(i == numYears - 1)
+		    cout << "No data for that year" << endl;
+		}
+	    }
 	}
     }
 
@@ -764,6 +824,25 @@ void findMaxFatality(storm_event**& array, int num, string year, int size)
     {
       cout << "Event ID: " << array[i]->event_id << endl;
       cout << "Number of fatalities: " << getFatalitySize(array[i]->f) << endl << endl;
+
+      //printing out all fields of fatality event
+      fatality_event* current = array[i]->f;
+      if(current != NULL)
+	{ 
+	  while(current != NULL)
+	    {
+	      cout << "Fatality ID: " << current->fatality_id << endl;
+	      cout << "Event ID: " << current->event_id << endl;
+	      cout << "Fatality Type: " << current->fatality_type << endl;
+	      cout << "Fatality Date: " << current->fatality_date << endl;
+	      cout << "Fatality Age: " << current->fatality_age << endl;
+	      cout << "Fatality Sex: " << current->fatality_sex << endl;
+	      cout << "Fatality Location: " << current->fatality_location << endl << endl;
+	      current = current->next;
+	    } 
+	}
+      else
+	cout << "No fatalities" << endl << endl;
     }
 }
 
@@ -910,4 +989,101 @@ void heapSortCropDamage(storm_event**& array, int n)
       array[i] = temp;
       maxHeapifyCropDamage(array, 0, i);
     }
+}
+
+//constructing BST from array
+void range(storm_event**& array, int size, string field, string low, string high)
+{
+  bool placed = false;
+
+  //BST for states
+  if(field == "state")
+    {
+      bst* root = new bst;
+      root->s = array[0]->state;
+      root->event_id = array[0]->event_id;
+
+      for(int i = 1; i < size; i++)
+	{
+	  bst* newNode = new bst;
+	  newNode->s = array[i]->state;
+	  root->event_id = array[i]->event_id;
+	  bst* temp = root;
+
+	  placed = false;
+	  while(!placed)
+	    {
+	      //node is less than parent
+	      if(newNode->s < temp->s)
+		{
+		  if(temp->left == NULL)
+		    {
+		      temp->left = newNode;
+		      placed = true;
+		    } 
+		  else
+		    temp = temp->left;
+		}
+	      //node is greater than parent
+	      else if(newNode->s > temp->s)
+		{
+		  if(temp->right == NULL)
+		    {
+		      temp->right = newNode;
+		      placed = true;
+		    }
+		  else
+		    temp = temp->right;
+		}
+	      //node is equal to parent
+	      else if(newNode->s == temp->s)
+		{
+		  if(newNode->event_id < temp->event_id)
+		    {
+		      if(temp->left == NULL)
+			{
+			  temp->left = newNode;
+			  placed = true;
+			}
+		      else
+			temp = temp->left;
+		    }
+		  else if(newNode->event_id > temp->event_id)
+		    {
+		      if(temp->right == NULL)
+			{
+			  temp->right = newNode;
+			  placed = true;
+			}
+		      else
+			temp = temp->right;
+		    }
+		}
+	    }
+	}
+      traverse(root, low, high);
+    }
+
+  //BST for months
+  else if(field == "month_name")
+    {
+
+    }
+}
+
+//performing an in order traversal of the tree and printing values in range
+void traverse(bst* node, string low, string high)
+{
+  if(node == NULL)
+    return;
+
+  traverse(node->left, low, high);
+
+  /*if(node->s >= lower && node->s <= upper)
+    {
+      cout << "State: " << node->s << endl;
+      cout << "Event ID: " << node->event_id << endl;
+    }
+  */
+  traverse(node->right, low, high);
 }
