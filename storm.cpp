@@ -34,6 +34,7 @@ void heapSortCropDamage(storm_event**&, int);
 void findMaxCropDamage(storm_event**&, int, string, int);
 void range(storm_event**&, int, string, string, string);
 void traverse(bst*, string, string);
+int getBSTHeight(bst*);
 
 using namespace std;
 
@@ -1003,12 +1004,16 @@ void range(storm_event**& array, int size, string field, string low, string high
       bst* root = new bst;
       root->s = array[0]->state;
       root->event_id = array[0]->event_id;
+      root->left = NULL;
+      root->right = NULL;
 
       for(int i = 1; i < size; i++)
 	{
 	  bst* newNode = new bst;
 	  newNode->s = array[i]->state;
-	  root->event_id = array[i]->event_id;
+	  newNode->event_id = array[i]->event_id;
+	  newNode->left = NULL;
+	  newNode->right = NULL;
 	  bst* temp = root;
 
 	  placed = false;
@@ -1063,6 +1068,11 @@ void range(storm_event**& array, int size, string field, string low, string high
 	    }
 	}
       traverse(root, low, high);
+
+      //printing heights of BST
+      cout << "Height of tree: " << getBSTHeight(root) << endl;
+      cout << "Height of left subtree: " << getBSTHeight(root->left) << endl;
+      cout << "Height of right subtree: " << getBSTHeight(root->right) << endl;
     }
 
   //BST for months
@@ -1080,11 +1090,28 @@ void traverse(bst* node, string low, string high)
 
   traverse(node->left, low, high);
 
-  /*if(node->s >= lower && node->s <= upper)
+  if(node->s >= low && node->s <= high)
     {
       cout << "State: " << node->s << endl;
-      cout << "Event ID: " << node->event_id << endl;
+      cout << "Event ID: " << node->event_id << endl << endl;
     }
-  */
+  
   traverse(node->right, low, high);
+}
+
+//returns height of BST
+int getBSTHeight(bst* node)
+{
+  if(node == NULL)
+    return 0;
+  else
+    {
+      int leftHeight = getBSTHeight(node->left);
+      int rightHeight = getBSTHeight(node->right);
+
+      if(leftHeight < rightHeight)
+	return rightHeight+1;
+      else
+	return leftHeight+1;
+    }
 }
