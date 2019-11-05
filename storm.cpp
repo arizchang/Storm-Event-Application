@@ -32,9 +32,10 @@ void maxHeapifyCropDamage(storm_event**&, int, int);
 void buildMaxHeapCropDamage(storm_event**&, int);
 void heapSortCropDamage(storm_event**&, int);
 void findMaxCropDamage(storm_event**&, int, string, int);
-void range(storm_event**&, int, string, string, string);
-void traverse(bst*, string, string);
+void range(storm_event**&, int, string, string, string, hash_table_entry**, annual_storms**, int, int);
+void traverse(bst*, string, string, string, hash_table_entry**, annual_storms**, int, int);
 int getBSTHeight(bst*);
+void findEventBST(annual_storms**&, hash_table_entry**&, int, int, int);
 
 using namespace std;
 
@@ -332,6 +333,9 @@ int main(int argc, char** argv)
       else if(word1 == "range")
 	{
 	  int numStorms = 0;
+	  parser >> word3; //field name
+	  parser >> word4; //low
+	  parser >> word5; //high
 	  //range among all years
 	  if(word2 == "all")
 	    {
@@ -352,8 +356,7 @@ int main(int argc, char** argv)
 		    }
 		}
 
-	      string year = "all years";
-	      cout << "range all " << endl;
+	      range(newEvents, numStorms, word3, word4, word5, hashTable, annualStorms, tableSize, numYears);
 	    }
 
 	  //range for a single year
@@ -374,8 +377,7 @@ int main(int argc, char** argv)
 		      for(int j = 0; j < numStorms; j++)
 			newEvents[j] = annualStorms[i]->events[j];
 
-		      cout << "Range " << year << endl;
-		      range(newEvents, numStorms, word3, word4, word5);
+		      range(newEvents, numStorms, word3, word4, word5, hashTable, annualStorms, tableSize, numYears);
 
 		      i = numYears;
 		    } 
@@ -994,13 +996,14 @@ void heapSortCropDamage(storm_event**& array, int n)
 }
 
 //constructing BST from array
-void range(storm_event**& array, int size, string field, string low, string high)
+void range(storm_event**& array, int size, string field, string low, string high, hash_table_entry** hashTable, annual_storms** annualStorms, int tableSize, int numYears)
 {
   bool placed = false;
 
   //BST for states
   if(field == "state")
     {
+      cout << "Range of states between " << low << " and " << high << ": " << endl;
       bst* root = new bst;
       root->s = array[0]->state;
       root->event_id = array[0]->event_id;
@@ -1067,36 +1070,113 @@ void range(storm_event**& array, int size, string field, string low, string high
 		}
 	    }
 	}
-      traverse(root, low, high);
+      traverse(root, low, high, field, hashTable, annualStorms, tableSize, numYears);
 
-      //printing heights of BST
+      cout << "Total number of nodes in BST: " << size << endl;
       cout << "Height of tree: " << getBSTHeight(root) << endl;
       cout << "Height of left subtree: " << getBSTHeight(root->left) << endl;
-      cout << "Height of right subtree: " << getBSTHeight(root->right) << endl;
+      cout << "Height of right subtree: " << getBSTHeight(root->right) << endl << endl;
     }
 
   //BST for months
   else if(field == "month_name")
     {
+      cout << "Range of months between " << low << " and " << high << ": " << endl;
+      bst* root = new bst;
+      root->s = array[0]->month_name;
+      root->event_id = array[0]->event_id;
+      root->left = NULL;
+      root->right = NULL;
 
+      for(int i = 1; i < size; i++)
+	{
+	  bst* newNode = new bst;
+	  newNode->s = array[i]->month_name;
+	  newNode->event_id = array[i]->event_id;
+	  newNode->left = NULL;
+	  newNode->right = NULL;
+	  bst* temp = root;
+
+	  placed = false;
+	  while(!placed)
+	    {
+	      //node is less than parent
+	      if(newNode->s < temp->s)
+		{
+		  if(temp->left == NULL)
+		    {
+		      temp->left = newNode;
+		      placed = true;
+		    } 
+		  else
+		    temp = temp->left;
+		}
+	      //node is greater than parent
+	      else if(newNode->s > temp->s)
+		{
+		  if(temp->right == NULL)
+		    {
+		      temp->right = newNode;
+		      placed = true;
+		    }
+		  else
+		    temp = temp->right;
+		}
+	      //node is equal to parent
+	      else if(newNode->s == temp->s)
+		{
+		  if(newNode->event_id < temp->event_id)
+		    {
+		      if(temp->left == NULL)
+			{
+			  temp->left = newNode;
+			  placed = true;
+			}
+		      else
+			temp = temp->left;
+		    }
+		  else if(newNode->event_id > temp->event_id)
+		    {
+		      if(temp->right == NULL)
+			{
+			  temp->right = newNode;
+			  placed = true;
+			}
+		      else
+			temp = temp->right;
+		    }
+		}
+	    }
+	}
+      traverse(root, low, high, field, hashTable, annualStorms, tableSize, numYears);
+
+      //printing heights of BST
+      cout << "Total number of nodes in BST: " << size << endl;
+      cout << "Height of tree: " << getBSTHeight(root) << endl;
+      cout << "Height of left subtree: " << getBSTHeight(root->left) << endl;
+      cout << "Height of right subtree: " << getBSTHeight(root->right) << endl << endl;
     }
 }
 
 //performing an in order traversal of the tree and printing values in range
-void traverse(bst* node, string low, string high)
+void traverse(bst* node, string low, string high, string field, hash_table_entry** hashTable, annual_storms** annualStorms, int tableSize, int numYears)
 {
   if(node == NULL)
     return;
 
-  traverse(node->left, low, high);
+  traverse(node->left, low, high, field, hashTable, annualStorms, tableSize, numYears);
 
   if(node->s >= low && node->s <= high)
     {
-      cout << "State: " << node->s << endl;
-      cout << "Event ID: " << node->event_id << endl << endl;
+      if(field == "state")
+	cout << "State: " << node->s << endl;
+      else if(field == "month_name")
+	cout << "Month: " << node->s << endl;
+      cout << "Event ID: " << node->event_id << endl;
+      findEventBST(annualStorms, hashTable, node->event_id, tableSize, numYears);
     }
   
-  traverse(node->right, low, high);
+  traverse(node->right, low, high, field, hashTable, annualStorms, tableSize, numYears);
 }
 
 //returns height of BST
@@ -1114,4 +1194,34 @@ int getBSTHeight(bst* node)
       else
 	return leftHeight+1;
     }
+}
+
+//prints out attributes for range query starting with year
+void findEventBST(annual_storms**& annualStorms, hash_table_entry**& hashTable, int eventId, int tableSize, int numYears)
+{
+  storm_event* event = new storm_event;
+
+  int eventIndex = search(hashTable, eventId, tableSize);
+  int year = searchYear(hashTable, eventId, tableSize);
+
+  //sets event pointer to correct event
+  if(eventIndex != -1)
+    {
+      for(int i = 0; i < numYears; i++)
+	{
+	  if(annualStorms[i]->year == year)
+	    {
+	      if(annualStorms[i]->events[eventIndex]->event_id == eventId)
+		{
+		  event = annualStorms[i]->events[eventIndex];
+		  i = numYears;
+		}
+	    }
+	}
+    }
+      //prints out attributes
+      cout << "Year: " << event->year << endl;
+      cout << "Event Type: " << event->event_type << endl;
+      cout << "CZ Type: " << event->cz_type << endl;
+      cout << "CZ Name: " << event->cz_name << endl << endl;
 }
