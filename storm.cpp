@@ -424,6 +424,7 @@ int getFileSize(string file)
   return lineCount;
 }
 
+//reads in data from fatalities file
 void readFatalitiesFile(hash_table_entry**& hashTable, storm_event**& stormEvents, string file, int tableSize)
 {
   //filling in array of storm_event structs
@@ -479,6 +480,7 @@ void readFatalitiesFile(hash_table_entry**& hashTable, storm_event**& stormEvent
     }
 }
 
+//reads in data from details file
 void readDetailsFile(hash_table_entry**& hashTable, storm_event**& stormEvents, string file, int tableSize)
 {
   //linking fatalities to respective storm events
